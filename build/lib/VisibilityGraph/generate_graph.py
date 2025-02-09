@@ -70,11 +70,14 @@ def df_tensor_representation(ds:list, window:int,
                              num_layers:int, pooling_method:str):
     
     data_section = ds
-    # col_types = ['high', 'open', 'close', 'low', 'amount', 'vol']
     emb_comb = []
     for i in col_types:
-        emb = make_embedding(data_section[i], window=window, feature_dimension, num_layers, pooling_method)  ##data_section train_x[0]
+        emb = make_embedding(data_section[i], window=window, feature_dimension = feature_dimension, 
+                             num_layers = num_layers, pooling_method = pooling_method)  ##data_section train_x[0]
         emb_comb.append(emb)
     concatenated_tensor = torch.cat(emb_comb, dim=1)
     return concatenated_tensor
+
+
+
 
