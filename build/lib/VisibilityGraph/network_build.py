@@ -47,8 +47,11 @@ def plot_visibility_graph(time_series, G, window_start, window_size):
     # Highlight rolling window
     plt.bar(x + 1, y, color='blue', alpha=0.6)
 
+    plot = []
     # Draw visibility edges for this window
     for i, j in G.edges():
+        a = plt.plot([x[i] + 1, x[j] + 1], [y[i], y[j]], 'k-', alpha=0.7)
+        plot.append(a)
         plt.plot([x[i] + 1, x[j] + 1], [y[i], y[j]], 'k-', alpha=0.7)
 
     plt.xlabel("Time Step")
@@ -56,6 +59,8 @@ def plot_visibility_graph(time_series, G, window_start, window_size):
     plt.title(f"Visibility Graph for Rolling Window [{window_start}:{window_start + window_size}]")
     plt.grid(True)
     plt.show()
+
+    return plot
 
 def plot_network_graph(G, time_series, window_start):
     """Plots the Visibility Graph as a network for a rolling window."""

@@ -78,6 +78,15 @@ def df_tensor_representation(ds:list, window:int,
     concatenated_tensor = torch.cat(emb_comb, dim=1)
     return concatenated_tensor
 
+def rolling_visibility_graphs(time_series, window_size):
+    """Generates Visibility Graphs on a rolling window basis."""
+    num_windows = len(time_series) - window_size + 1
+    rolling_vgs = {}
 
+    for i in range(num_windows):
+        window = time_series[i:i + window_size]
+        rolling_vgs[i] = visibility_graph(window)
+
+    return rolling_vgs
 
 
