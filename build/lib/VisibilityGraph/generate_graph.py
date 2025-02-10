@@ -49,6 +49,22 @@ def generate_graph_embedding_pytorch_geometric(num_nodes, edge_index, feature_di
     return graph_embedding
 
 
+def rolling_visibility_graphs(time_series, window_size):
+    """Generates Visibility Graphs on a rolling window basis."""
+    num_windows = len(time_series) - window_size + 1
+    rolling_vgs = {}
+
+    for i in range(num_windows):
+        window = time_series[i:i + window_size]
+        rolling_vgs[i] = visibility_graph(window)
+
+    return rolling_vgs
+
+### for feeding through the pyG pipeline
+def make_graph(time_series,window):
+    rolling_vgs = rolling_visibility_graphs(time_series, window)
+    return rolling_vgs
+
 def make_embedding(time_series, window, feature_dimension, num_layers, pooling_method):
     vg = make_graph(time_series, window)
     graph = vg[0]
@@ -56,12 +72,6 @@ def make_embedding(time_series, window, feature_dimension, num_layers, pooling_m
     edge_index = torch.tensor(list(graph.edges), dtype=torch.long).t().contiguous()
     graph_embedding = generate_graph_embedding_pytorch_geometric(num_nodes, edge_index, feature_dimension, num_layers, pooling_method)
     return graph_embedding
-
-
-### for feeding through the pyG pipeline
-def make_graph(time_series,window):
-    rolling_vgs = rolling_visibility_graphs(time_series, window)
-    return rolling_vgs
 
 
 
@@ -78,15 +88,5 @@ def df_tensor_representation(ds:list, window:int,
     concatenated_tensor = torch.cat(emb_comb, dim=1)
     return concatenated_tensor
 
-def rolling_visibility_graphs(time_series, window_size):
-    """Generates Visibility Graphs on a rolling window basis."""
-    num_windows = len(time_series) - window_size + 1
-    rolling_vgs = {}
-
-    for i in range(num_windows):
-        window = time_series[i:i + window_size]
-        rolling_vgs[i] = visibility_graph(window)
-
-    return rolling_vgs
 
 
