@@ -2,6 +2,7 @@ import pandas as pd
 import xgboost as xgb
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from tqdm import tqdm
+from sklearn.model_selection import train_test_split
 
 
 def emb_model_train(embedded_df,estimators,lr,max_depth,obj,eval_met,ts_size,random_state):
@@ -62,6 +63,8 @@ def make_emb_valid(valid_set_x):
             valid_ts = pd.concat([valid_ts,valid_set_x[i].head(1)],axis=0)
         else:
             valid_ts = pd.concat([valid_ts,valid_set_x[i]],axis=0)
+
+    return valid_ts
 
 
 
