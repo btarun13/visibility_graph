@@ -3,7 +3,8 @@
 After reading several papers on graphs and time series, I came across an approach for utilizing time series data to construct graphs. These graphs are known as visibility graphs. As shown in the animation, points are connected based on the visibility of towers, which represent values at different time points. Using this method, we can generate graphs for different rolling windows, where each window represents a separate graph.
 
 
-![Demonstration of the project's key features](https://github.com/btarun13/visibility_graph/blob/feature_build/my_ts_animation.gif)
+
+![Demonstration of the project's key features](https://github.com/btarun13/visibility_graph/blob/main/my_ts_animation.gif)
 
 
 
@@ -12,7 +13,7 @@ With this graph, we can derive vector representations that can be used for downs
 
 
 
-![image for project](https://github.com/btarun13/visibility_graph/blob/feature_build/combine_vg_window_10.png)
+![image for project](https://github.com/btarun13/visibility_graph/blob/main/combine_vg_window_10.png)
 
 
 After generating graphs for each time series within different windows, I build embeddings using a GCN architecture. I use a one-layer aggregation, which corresponds to aggregating information from one hop.
