@@ -1,6 +1,9 @@
 import torch
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv, global_mean_pool, global_add_pool, global_max_pool
+import networkx as nx
+import pandas as pd
+
 # from VisibilityGraph.network_build import visibility_graph,rolling_visibility_graphs,plot_visibility_graph,plot_network_graph
 
 def generate_graph_embedding_pytorch_geometric(num_nodes, edge_index, feature_dimension, num_layers, pooling_method):
@@ -50,16 +53,43 @@ def generate_graph_embedding_pytorch_geometric(num_nodes, edge_index, feature_di
     return graph_embedding
 
 
+def visibility_graph(time_series):
+    """Constructs a Visibility Graph (VG) from a time series window."""
+    G = nx.Graph()
+    n = len(time_series)
+    for i in range(n):
+        G.add_node(i, value=time_series[i])
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            visible = True
+            for k in range(i + 1, j):
+                if time_series[k] > time_series[i] + (time_series[j] - time_series[i]) * (k - i) / (j - i):
+                    visible = False
+                    break
+            if visible:
+                G.add_edge(i, j)
+
+    return G
 
 ### for feeding through the pyG pipeline
-def make_graph(time_series,window):
-    """Generates Visibility Graphs on a rolling window basis."""
-    num_windows = len(time_series) - window_size + 1
+# def make_graph(time_series,window):
+#     """Generates Visibility Graphs on a rolling window basis."""
+#     num_windows = len(time_series) - window + 1
+#     rolling_vgs = {}
+#     for i in range(num_windows):
+#         window = time_series[i:i + window]
+#         rolling_vgs[i] = visibility_graph(window)
+#     rolling_vgs = rolling_vgs
+#     return rolling_vgs
+
+def make_graph(time_series, window):
+    num_windows = len(time_series) - window + 1
     rolling_vgs = {}
     for i in range(num_windows):
-        window = time_series[i:i + window_size]
-        rolling_vgs[i] = visibility_graph(window)
-    rolling_vgs = rolling_vgs
+        # Rename the slice to avoid conflict with the window parameter
+        ts_window = time_series[i:i + window]
+        rolling_vgs[i] = visibility_graph(ts_window)
     return rolling_vgs
 
 def make_embedding(time_series, window, feature_dimension, num_layers, pooling_method):
@@ -77,13 +107,31 @@ def df_tensor_representation(ds:list, window:int,
                              num_layers:int, pooling_method:str):
     
     data_section = ds
-    emb_comb = []
-    for i in col_types:
-        emb = make_embedding(data_section[i], window=window, feature_dimension = feature_dimension, 
-                             num_layers = num_layers, pooling_method = pooling_method)  ##data_section train_x[0]
-        emb_comb.append(emb)
-    concatenated_tensor = torch.cat(emb_comb, dim=1)
-    return concatenated_tensor
+    # print(len(data_section))
+    
+    count = 0
+    for j in data_section:
+        emb_comb = []
+        for i in col_types:
+            # print(list(j[i]))
+
+            emb = make_embedding(list(j[i]), window=window, feature_dimension = feature_dimension, num_layers = num_layers, pooling_method = pooling_method)  ##data_section train_x[0]
+            
+            emb_comb.append(emb)
+
+        concatenated_tensor = torch.cat(emb_comb, dim=1).detach().numpy()
+        # print(concatenated_tensor.shape)
+        if count == 0:
+            num_cols = concatenated_tensor.shape[1]
+            df = pd.DataFrame(concatenated_tensor,columns=[f'emb_{i}' for i in range(num_cols)])
+            # print(df.shape)
+        else:
+            df2 = pd.DataFrame(concatenated_tensor,columns=[f'emb_{i}' for i in range(num_cols)])
+            df = pd.concat([df,df2],axis=0)
+        count += 1
+
+    del emb_comb, concatenated_tensor
+    return df
 
 
 

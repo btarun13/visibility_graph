@@ -1,6 +1,6 @@
 import pandas as pd
 
-def make_df_list(df, window, k):
+def make_df_list(df, window, k,col_types:list):
     data_x = []
     label_list = []
     # Calculate the features
@@ -12,7 +12,7 @@ def make_df_list(df, window, k):
         if future_index >= len(df) - 1:
             break
         
-        X = df.iloc[t:t + window,:][['date', 'high', 'open', 'close', 'low', 'amount', 'vol']]
+        X = df.iloc[t:t + window,:][col_types]
         data_x.append(X.reset_index(drop=True))
         del X
 
