@@ -3,6 +3,7 @@ import xgboost as xgb
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 
 def emb_model_train(embedded_df,estimators,lr,max_depth,obj,eval_met,ts_size,random_state):
